@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# Ammar
-
 import subprocess
 import os
 import time
 from multiprocessing import Pool
 from functools import partial
 from optparse import OptionParser
-
+import os.path
 
 # This function to perform the parsing process to build a syntactic tree
 def _parseIt(corpus, _file):
@@ -17,7 +15,8 @@ def _parseIt(corpus, _file):
     print _file, '\tpid:', os.getpid()
 
     # perfom the parsing process to build a syntactic tree   
-    cmd = "./parse.sh " + corpus +"/"+ _file + " > "+ corpus + "/"+ _file + "-parsed.txt 2>"+ corpus + "/"+ _file +"-parsed.err"
+    ##cmd = "./parse.sh " + corpus +"/"+ _file + " > "+ corpus + "/"+ _file + "-parsed.txt 2>"+ corpus + "/"+ _file +"-parsed.err"
+    cmd = "python parse.py -i " + corpus +"/"+ _file + " -o "+ corpus + "/"+ _file + "-parsed.txt"
     #print "cmd:", cmd
     process = subprocess.call(cmd, shell=True)
     
@@ -40,18 +39,13 @@ def run(_in_file, corpus, PROCESSES):
     cmd = "split -d -l "+ str(num)+ " " + _in_file + " "+ corpus +"/segment"
     process = subprocess.call(cmd, shell=True)
 
-
-    # since the last seg. is almost very small, we can concatente it with the one before the last (e.g. segment08 to segment07) 
-    cmd = "cat "+corpus +"/segment"+ PROCESSES +" >> "+ corpus+"/segment" + str(int(PROCESSES)-1).zfill(2)
-    process = subprocess.call(cmd, shell=True)
-    
-    # remove the last segement
-    fileToRemove = corpus +"/segment"+ PROCESSES
-    try:
-        os.remove(fileToRemove)
-    except OSError:
-        pass
-
+    #'''
+    # since the last seg. is almost very small, we can concatente it with the one before the last (e.g. segment08 to segment07)
+    fileLastToRemove =  corpus +"/segment"+ PROCESSES
+    if os.path.exists(fileLastToRemove):
+        cmd = "cat " + fileLastToRemove +" >> "+ corpus+"/segment" + str(int(PROCESSES)-1).zfill(2)
+        process = subprocess.call(cmd, shell=True)
+        os.remove(fileLastToRemove)
     
 
     paths = []
@@ -67,7 +61,7 @@ def run(_in_file, corpus, PROCESSES):
 
     pool = Pool(processes=int(PROCESSES))
 
-    print "Initialized with ", PROCESSES, "processes"
+    #print "Initialized with ", PROCESSES, "processes"
         
 
     result = pool.map_async(partial(_parseIt, corpus), paths[0:])
