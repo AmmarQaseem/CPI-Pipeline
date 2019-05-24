@@ -7,7 +7,8 @@
 """
 
 import sys, os
-import xml.etree.cElementTree as ElementTree
+#import xml.etree.cElementTree as ElementTree
+from lxml import etree as ElementTree
 
 DictPrediction = {}
 
@@ -85,8 +86,8 @@ def setPairsInteraction(filename):
                 pair.set("interaction", "False")
             
             else:
-                pair.set("interaction", "Error")
-               
+                #pair.set("interaction", "Error")
+                pair.set("interaction", "False") # Here the parser could not parse the sentence and this pair does not appear in the output, for that you can give assign False for this pair 
             
     return tree
  

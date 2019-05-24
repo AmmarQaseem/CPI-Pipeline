@@ -47,12 +47,12 @@ kernel-APG-CV:
 
 kernel-APG-PR:
 	bash APG_Pipeline.sh -t PR -f $(InputFile) -p $(Processors)
-	python SetInteractionPrediction.py -k $(Kernel_Upper) -t $(expTyp_Upper) -i $(InputFile) -r DS.sql -o output.apg.xml
+	python SetInteractionPrediction.py -k $(Kernel_Upper) -t $(expTyp_Upper) -i $(InputFile) -r output.sql -o output.apg.xml
 
 kernel-APG-XX:
 	$(MAKE) kernel-APG-XX-train
 	$(MAKE) kernel-APG-XX-test
-	#python SetInteractionPrediction.py -k $(Kernel_Upper) -t $(expTyp_Upper) -i $(TestFile) -r DS.sql -o output.apg..xml
+	python SetInteractionPrediction.py -k $(Kernel_Upper) -t $(expTyp_Upper) -i $(TestFile) -r output.sql -o output.apg.xml
 
 kernel-APG-XX-train:
 	bash APG_Pipeline.sh -t XX -f $(TrainFile) -x train -p $(Processors)
@@ -71,8 +71,9 @@ kernel-SL-PR:
 
 kernel-SL-XX:
 	$(MAKE) kernel-SL-XX-train
+	$(MAKE) clean-SL
 	$(MAKE) kernel-SL-XX-test
-	#python SetInteractionPrediction.py -k $(Kernel_Upper) -t $(expTyp_Upper) -i $(TestFile) -r output.sql -o output.sl.xml
+	python SetInteractionPrediction.py -k $(Kernel_Upper) -t $(expTyp_Upper) -i $(TestFile) -r output.sql -o output.sl.xml
 
 kernel-SL-XX-train:
 	bash SL_Pipeline.sh -t XX -f $(TrainFile) -x train -p $(Processors)
@@ -89,7 +90,7 @@ clean-APG-pre-steps:
 	@cd CPI-corpora-preparing && \
 		rm -rf bllip-parser/DS/ bllip-parser/DS*.txt && \
 		rm -rf export_step1/DS* && \
-		rm -rf export_step3/DS* && \
+		rm -rf export_step3/DS* export_step3/charniak-johnson/DS* && \
 		rm -rf export_step4/DS/ export_step4/DS* && \
 		rm -rf export_step6/CV/ export_step6/splits-test-train/ export_step6/DS* && \
 		rm -rf step5_copied_from_3/DS* step5_copied_from_3/test* && \
@@ -105,10 +106,11 @@ clean-APG-kernel-steps:
 clean-SL: clean-SL-pre-steps clean-SL-kernel-steps
 
 clean-SL-pre-steps:
-	@cd ppi-benchmark/Corpora/ && \
-		rm -rf Work/ SL/ Splits/*/ Original/ Original-Modified/ splits-test-train/ && \
-		rm -rf Syntax-Tree-Learning-Format/DS* && \
-		cd ../..
+	@cd ppi-benchmark/ && \
+		rm -rf Parsing/DS/ && \
+		rm -rf Corpora/Work/ Corpora/SL/ Corpora/Splits/*/ Corpora/Original/ Corpora/Original-Modified/ Corpora/splits-test-train/ && \
+		rm -rf Corpora/Syntax-Tree-Learning-Format/DS* && \
+		cd ..
 
 clean-SL-kernel-steps:
 	@cd ppi-benchmark && \
